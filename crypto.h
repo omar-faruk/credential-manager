@@ -22,12 +22,12 @@ string decrypt(string data,int key){
 }
 
 bool entryNotFound(string site,string user,int key ){
-    freopen("data//db.o","r",stdin);
-    string esite,euser,epass;
 
-    while(cin>>esite>>euser>>epass){
+    string esite,euser,epass;
+    fstream din("data//db.o",std::ios_base::in);
+
+    while(din>>esite>>euser>>epass){
         if(decrypt(esite,key)==site && decrypt(euser,key)==user){
-            fclose(stdin);
             return false;
             break;
         }

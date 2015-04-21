@@ -11,12 +11,12 @@ loginWindow::loginWindow(QWidget *parent) :
 {
 
     string first_use_check;
-    freopen("data//up.o","r",stdin);
+    freopen("data//up.o","r+",stdin);
     getline(cin,first_use_check);
     ui->setupUi(this);
     connect(ui->password,SIGNAL(returnPressed()),ui->loginButton,SIGNAL(clicked()));
 
-    if(first_use_check.size()<5){
+    if(first_use_check.size()<2){
         firstUse=true;
         ui->username->setProperty("placeholderText","set username");
         ui->password->setProperty("placeholderText","set password");
@@ -39,14 +39,20 @@ void loginWindow::on_loginButton_clicked()
     pass=ui->password->text().toStdString();
 
     if(firstUse){
-        freopen("data//up.o","w",stdout);
+        freopen("data//up.o","a+",stdout);
         cout<<user<<endl<<pass<<endl;
+        fclose(stdin);
+        this->hide();
+        credentialWindow cw;
+        cw.setModal(true);
+        cw.exec();
     }
     else{
-        freopen("data//up.o","r",stdin);
+        freopen("data//up.o","r+",stdin);
         cin>>user_s;
         cin>>pass_s;
         if(user==user_s && pass==pass_s){
+            fclose(stdin);
             this->hide();
             credentialWindow cw;
             cw.setModal(true);

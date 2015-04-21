@@ -2,6 +2,7 @@
 #include "crypto.h"
 #include "ui_credentialwindow.h"
 using namespace std;
+
 credentialWindow::credentialWindow(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::credentialWindow)
@@ -20,9 +21,10 @@ credentialWindow::~credentialWindow()
 
 void credentialWindow::on_searchButton_clicked()
 {
-    string user,pass,site,dsite,duser,dpass,kstring;
+    string site,dsite,duser,dpass;
     int key,count=0;
     bool dataFound=false;
+
     site=ui->siteEntry->text().toStdString();
     key=atoi(ui->keyEntry->text().toStdString().c_str());
 
@@ -36,9 +38,11 @@ void credentialWindow::on_searchButton_clicked()
     model->setHorizontalHeaderItem(1, new QStandardItem(QString("userID")));
     model->setHorizontalHeaderItem(2, new QStandardItem(QString("Password")));
     ui->tableView->setModel(model);
-    fclose(stdin);
-    freopen("data//db.o","r",stdin);
-    while(cin>>dsite>>duser>>dpass){
+
+    fstream din("data//db.o",std::ios_base::in);
+
+
+    while(din>>dsite>>duser>>dpass){
         dsite=decrypt(dsite,key);
         if(dsite==site){
             dataFound=true;
@@ -51,11 +55,11 @@ void credentialWindow::on_searchButton_clicked()
             count++;
         }
     }
+    fclose(stdin);
     if(!dataFound){
         ui->messageBox->setText("no entry found for this site");
     }
-    fclose(stdin);
-
+    return;
 }
 
 void credentialWindow::on_addButton_clicked()
@@ -78,7 +82,9 @@ void credentialWindow::on_addButton_clicked()
 
     if(pass==confirm_pass){
         if(entryNotFound(site,user,key)){
-            freopen("data//db.o","a",stdout);
+            if(freopen("data//db.o","a+",stdout)==NULL){
+                ui->messageBox->setText("Error Opening File");
+            }
             cout<<encrypt(site,key)<<"\t"<<encrypt(user,key)<<"\t"<<encrypt(pass,key)<<endl;
             ui->messageBox->setText("Entry Successfull");
             fclose(stdout);
@@ -89,9 +95,9 @@ void credentialWindow::on_addButton_clicked()
     }
 
     else{
-       ui->messageBox->setText("Password mismatch, re-enter password");
-       ui->passwordEntry->clear();
-       ui->confirmPass->clear();
+        ui->messageBox->setText("Password mismatch, re-enter password");
+        ui->passwordEntry->clear();
+        ui->confirmPass->clear();
     }
-
+    return;
 }
